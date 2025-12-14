@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: neo4j_perf
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+      - ./scripts:/import
+    environment:
+      # SRE: Injeção segura via .env com fallback
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test123}
+      
+      # === OTIMIZAÇÃO DE MEMÓRIA ===
+      # Limites estritos para forçar validação de GC
+      - NEO4J_server_memory_heap_initial__size=768M
+      - NEO4J_server_memory_heap_max__size=768M
+      - NEO4J_server_memory_pagecache_size=384M
+      
+      # === OBSERVABILIDADE ===
+      - NEO4J_db_logs_query_threshold=50ms
+      - NEO4J_db_logs_query_enabled=INFO
+      # Habilita log de parâmetros (crucial para debug de queries lentas)
+      - NEO4J_db_logs_query_parameter__logging__enabled=true 
+      
+      - NEO4J_metrics_enabled=true
+      - NEO4J_metrics_csv_enabled=true
+      - NEO4J_metrics_csv_interval=5s
+      
+      # === TUNING ===
+      - NEO4J_db_transaction_timeout=30s
+      
+    networks:
+      - graph_net
+    
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p test123 'RETURN 1' || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+volumes:
+  neo4j_data:
+    driver: local
+  neo4j_logs:
+    driver: local
+
+networks:
+  graph_net:
+    driver: bridge
