@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.py[cod]
+scripts/*.csv      # Ignorar CSVs gerados (podem ser grandes)
+jmeter/results/    # Ignorar resultados de testes
+analysis/*.png     # Ignorar gráficos gerados
+.env
