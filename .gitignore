@@ -1,7 +1,42 @@
-venv/
+# ===========================
+# 1. Python & Ambientes
+# ===========================
 __pycache__/
 *.py[cod]
-scripts/*.csv      # Ignorar CSVs gerados (podem ser grandes)
-jmeter/results/    # Ignorar resultados de testes
-analysis/*.png     # Ignorar gráficos gerados
+*$py.class
+.venv/
+venv/
+env/
 .env
+
+# ===========================
+# 2. IDE & Sistema
+# ===========================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ===========================
+# 3. Artefatos do Projeto (Dados Gerados)
+# ===========================
+# Ignorar CSVs gerados, mas manter scripts
+scripts/*.csv
+# Ignorar arquivos de dados soltos
+*.csv
+*.json
+
+# ===========================
+# 4. Resultados de Testes & Logs
+# ===========================
+# Ignorar relatórios HTML e logs do JMeter, mas manter o plano (.jmx)
+jmeter/results/*
+!jmeter/results/.gitkeep
+*.log
+*.jtl
+
+# ===========================
+# 5. Gráficos de Análise
+# ===========================
+analysis/*.png
+analysis/*.html

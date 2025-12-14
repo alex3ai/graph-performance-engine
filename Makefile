@@ -1,14 +1,23 @@
 # ===================================================================
 # GRAPH PERFORMANCE ENGINE - AUTOMATION SUITE
-# Ferramentas de Orquestração, Teste e Observabilidade
 # ===================================================================
 
 .PHONY: help setup start stop clean generate import test analyze destroy monitor status report
 
-# Configuração de Ambiente
-VENV_BIN=.venv/bin
+# --- DETECÇÃO DE SISTEMA OPERACIONAL (Cross-Platform) ---
+ifeq ($(OS),Windows_NT)
+    # Configuração para Windows
+    VENV_BIN=.venv/Scripts
+    PYTHON_CMD=python
+else
+    # Configuração para Linux/Mac
+    VENV_BIN=.venv/bin
+    PYTHON_CMD=python3
+endif
+
+# Caminhos Absolutos do Venv
 PYTHON=$(VENV_BIN)/python
-PIP=$(VENV_BIN)/pip
+PIP=$(PYTHON) -m pip
 
 # Variáveis de Execução (Timestamps e Caminhos)
 TIMESTAMP := $(shell date +%Y-%m-%d_%H-%M-%S)
