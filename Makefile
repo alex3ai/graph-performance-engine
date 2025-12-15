@@ -108,7 +108,7 @@ report: ## Abre o último relatório HTML gerado
 		echo "$(RED)❌ Nenhum relatório encontrado.$(NC)"; \
 	else \
 		echo "Abrindo: $$LATEST/index.html"; \
-		$(OPEN_CMD) "$$LATEST/index.html"; \
+		$(OPEN_CMD) "$$LATEST/index.html" || true; \
 	fi
 
 monitor: ## Monitora memória do container em tempo real
