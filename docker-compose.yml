@@ -13,8 +13,8 @@ services:
       - ./scripts:/import
     environment:
       # SRE: Injeção segura via .env com fallback
-      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test123}
-      
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test1234} # SENHA ATUALIZADA (8 caracteres)
+      - NEO4J_server_config_strict__validation_enabled=false # CORREÇÃO DO ERRO DE CONFIG (Ignora configs obsoletas)
       # === OTIMIZAÇÃO DE MEMÓRIA ===
       # Limites estritos para forçar validação de GC
       - NEO4J_server_memory_heap_initial__size=768M
@@ -38,7 +38,7 @@ services:
       - graph_net
     
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p test123 'RETURN 1' || exit 1"]
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p test1234 'RETURN 1' || exit 1"] # SENHA ATUALIZADA (8 caracteres)
       interval: 15s
       timeout: 10s
       retries: 5

@@ -49,7 +49,7 @@ start: ## Inicia infraestrutura Docker (Neo4j)
 	@echo "$(BLUE)🐳 Verificando containers...$(NC)"
 	docker-compose up -d
 	@echo "$(YELLOW)⏳ Aguardando Healthcheck do Neo4j...$(NC)"
-	@timeout 60s bash -c 'until docker ps | grep "neo4j_perf" | grep "(healthy)"; do sleep 2; done' || echo "$(RED)⚠️ Timeout aguardando healthcheck (verifique logs)$(NC)"
+	@timeout 120s bash -c 'until docker ps | grep "neo4j_perf" | grep "(healthy)"; do sleep 2; done' || echo "$(RED)⚠️ Timeout aguardando healthcheck (verifique logs)$(NC)"
 	@echo "$(GREEN)✅ Neo4j online: http://localhost:7474$(NC)"
 
 stop: ## Para a infraestrutura
@@ -71,12 +71,12 @@ generate-small: ## Gera dataset pequeno para dev (10k Users)
 import: start ## Executa pipeline de importação (Bash + Cypher)
 	@echo "$(BLUE)📥 Iniciando ingestão no Neo4j...$(NC)"
 	@chmod +x scripts/run_import.sh
-	@./scripts/run_import.sh
+	@bash scripts/run_import.sh
 	@echo "$(GREEN)✅ Ingestão concluída.$(NC)"
 
 validate: ## Valida contagem de nós e relações
 	@echo "$(BLUE)🔍 Validando integridade do grafo...$(NC)"
-	@docker exec neo4j_perf cypher-shell -u neo4j -p test123 \
+	@docker exec neo4j_perf cypher-shell -u neo4j -p test1234 \ 
 		"MATCH (n) RETURN labels(n)[0] as Label, count(n) as Count UNION ALL MATCH ()-[r]->() RETURN type(r) as Label, count(r) as Count;"
 
 # Dependência: Garante que os dados foram importados recentemente antes de testar
