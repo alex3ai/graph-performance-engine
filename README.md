@@ -16,7 +16,6 @@
 - [Arquitetura](#-arquitetura)
 - [Diferenciais Técnicos](#-diferenciais-técnicos)
 - [Quickstart](#-quickstart)
-- [Documentação Completa](#-documentação-completa)
 - [Benchmarks](#-benchmarks)
 - [Troubleshooting](#-troubleshooting)
 - [Roadmap](#-roadmap)
@@ -412,3 +411,4 @@ Conecte-se comigo:
 **⭐ Se este projeto foi útil, deixe uma estrela! ⭐**
 
 </div>
+
