@@ -76,8 +76,7 @@ import: start ## Executa pipeline de importação (Bash + Cypher)
 
 validate: ## Valida contagem de nós e relações
 	@echo "$(BLUE)🔍 Validando integridade do grafo...$(NC)"
-	@docker exec neo4j_perf cypher-shell -u neo4j -p test1234 \ 
-		"MATCH (n) RETURN labels(n)[0] as Label, count(n) as Count UNION ALL MATCH ()-[r]->() RETURN type(r) as Label, count(r) as Count;"
+	@docker exec neo4j_perf cypher-shell -u neo4j -p test1234 "MATCH (n) RETURN labels(n)[0] as Label, count(n) as Count UNION ALL MATCH ()-[r]->() RETURN type(r) as Label, count(r) as Count;"
 
 # Dependência: Garante que os dados foram importados recentemente antes de testar
 test-jmeter: import ## Executa Teste de Carga e gera Dashboard HTML
