@@ -2,48 +2,49 @@ version: '3.8'
 
 services:
   neo4j:
-    image: neo4j:5.15-community
+    image: neo4j:5.15.0  # Usando tag específica para estabilidade
     container_name: neo4j_perf
     ports:
       - "7474:7474"
       - "7687:7687"
+    environment:
+      # === SEGURANÇA ===
+      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test1234}
+      # Desabilita validação estrita para evitar erros de config antiga
+      - NEO4J_server_config_strict__validation_enabled=false
+      
+      # === MEMÓRIA (Perfil Econômico 1GB) ===
+      # Alinhado com a reserva de recursos
+      - NEO4J_server_memory_heap_initial__size=1G
+      - NEO4J_server_memory_heap_max__size=1G
+      - NEO4J_server_memory_pagecache_size=512M
+      # Limite global de transação para evitar OutOfMemoryError
+      - NEO4J_dbms_memory_transaction_global__max__size=512m
+      
+      # === TUNING PARA WINDOWS (CRÍTICO) ===
+      # Aumentado de 30s para 2h. 
+      # O sistema de arquivos do Windows é lento; 30s causa o erro "Transaction Terminated".
+      - NEO4J_db_transaction_timeout=2h
+      
+      # === LOGS ===
+      - NEO4J_db_logs_query_threshold=100ms
+      - NEO4J_db_logs_query_enabled=INFO
+      
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
       - ./scripts:/import
-    environment:
-      # SRE: Injeção segura via .env com fallback
-      - NEO4J_AUTH=${NEO4J_AUTH:-neo4j/test1234} # SENHA ATUALIZADA (8 caracteres)
-      - NEO4J_server_config_strict__validation_enabled=false # CORREÇÃO DO ERRO DE CONFIG (Ignora configs obsoletas)
-      # === OTIMIZAÇÃO DE MEMÓRIA ===
-      # Limites estritos para forçar validação de GC
-      - NEO4J_server_memory_heap_initial__size=768M
-      - NEO4J_server_memory_heap_max__size=768M
-      - NEO4J_server_memory_pagecache_size=384M
-      
-      # === OBSERVABILIDADE ===
-      - NEO4J_db_logs_query_threshold=50ms
-      - NEO4J_db_logs_query_enabled=INFO
-      # Habilita log de parâmetros (crucial para debug de queries lentas)
-      - NEO4J_db_logs_query_parameter__logging__enabled=true 
-      
-      - NEO4J_metrics_enabled=true
-      - NEO4J_metrics_csv_enabled=true
-      - NEO4J_metrics_csv_interval=5s
-      
-      # === TUNING ===
-      - NEO4J_db_transaction_timeout=30s
       
     networks:
       - graph_net
     
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p test1234 'RETURN 1' || exit 1"] # SENHA ATUALIZADA (8 caracteres)
-      interval: 15s
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p test1234 'RETURN 1' || exit 1"]
+      interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 20
       start_period: 30s
-    
+
     deploy:
       resources:
         limits:
