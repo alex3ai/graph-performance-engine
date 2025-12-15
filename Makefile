@@ -9,10 +9,15 @@ ifeq ($(OS),Windows_NT)
     # Configuração para Windows
     VENV_BIN=.venv/Scripts
     PYTHON_CMD=python
+    OPEN_CMD=explorer
 else
     # Configuração para Linux/Mac
     VENV_BIN=.venv/bin
     PYTHON_CMD=python3
+    OPEN_CMD=xdg-open
+    ifeq ($(shell uname),Darwin)
+        OPEN_CMD=open
+    endif
 endif
 
 # Caminhos Absolutos do Venv
@@ -41,7 +46,7 @@ help: ## Mostra esta mensagem de ajuda
 
 setup: ## Cria virtualenv e instala dependências Python
 	@echo "$(BLUE)📦 Configurando ambiente Python...$(NC)"
-	python3 -m venv .venv
+	$(PYTHON_CMD) -m venv .venv
 	$(PIP) install -r requirements.txt
 	@echo "$(GREEN)✅ Dependências instaladas!$(NC)"
 
@@ -78,8 +83,8 @@ validate: ## Valida contagem de nós e relações
 	@echo "$(BLUE)🔍 Validando integridade do grafo...$(NC)"
 	@docker exec neo4j_perf cypher-shell -u neo4j -p test1234 "MATCH (n) RETURN labels(n)[0] as Label, count(n) as Count UNION ALL MATCH ()-[r]->() RETURN type(r) as Label, count(r) as Count;"
 
-# Dependência: Garante que os dados foram importados recentemente antes de testar
-test-jmeter: import ## Executa Teste de Carga e gera Dashboard HTML
+# Dependência: Garante que o banco está online (start) mas NÃO importa de novo
+test-jmeter: start ## Executa Teste de Carga e gera Dashboard HTML
 	@echo "$(YELLOW)⚡ Executando JMeter (Stress Test)...$(NC)"
 	@mkdir -p $(RESULTS_DIR)
 	@echo "   📁 Log: $(CURRENT_JTL)"
@@ -87,10 +92,7 @@ test-jmeter: import ## Executa Teste de Carga e gera Dashboard HTML
 	@# Executa JMeter: -n (non-gui), -t (plan), -l (log), -e -o (html report)
 	@jmeter -n -t jmeter/load_test.jmx -l $(CURRENT_JTL) -e -o $(CURRENT_REPORT)
 	@echo "$(GREEN)✅ Teste finalizado.$(NC)"
-	@# Cria link simbólico para 'latest' para facilitar acesso rápido
-	@rm -f $(RESULTS_DIR)/latest_report
-	@ln -s $(PWD)/$(CURRENT_REPORT) $(RESULTS_DIR)/latest_report
-	@echo "$(BLUE)👉 Relatório disponível em: $(RESULTS_DIR)/latest_report/index.html$(NC)"
+	@echo "$(GREEN)✅ Relatório gerado em: $(CURRENT_REPORT)/index.html$(NC)"
 
 # Dependência: Garante que um teste novo foi rodado antes de analisar
 analyze: test-jmeter ## Gera gráficos customizados Python do último teste
@@ -98,11 +100,16 @@ analyze: test-jmeter ## Gera gráficos customizados Python do último teste
 	$(PYTHON) scripts/analyze_results.py $(CURRENT_JTL) --output analysis/
 	@echo "$(GREEN)✅ Análise Python gerada em ./analysis/$(NC)"
 
-report: ## Abre o último relatório HTML gerado (Cross-platform)
-	@echo "$(BLUE)🌎 Abrindo relatório no navegador...$(NC)"
-	@if [ "$$(uname)" = "Darwin" ]; then open $(RESULTS_DIR)/latest_report/index.html; \
-	elif [ "$$(expr substr $$(uname -s) 1 5)" = "Linux" ]; then xdg-open $(RESULTS_DIR)/latest_report/index.html; \
-	else echo "$(YELLOW)⚠️ Sistema não detectado automaticamente. Abra: $(RESULTS_DIR)/latest_report/index.html$(NC)"; fi
+report: ## Abre o último relatório HTML gerado
+	@echo "$(BLUE)🌎 Tentando abrir o relatório mais recente...$(NC)"
+	@# Encontra o diretório mais recente em jmeter/results/report_* e abre o index.html
+	@LATEST=$$(ls -td $(RESULTS_DIR)/report_* | head -1); \
+	if [ -z "$$LATEST" ]; then \
+		echo "$(RED)❌ Nenhum relatório encontrado.$(NC)"; \
+	else \
+		echo "Abrindo: $$LATEST/index.html"; \
+		$(OPEN_CMD) "$$LATEST/index.html"; \
+	fi
 
 monitor: ## Monitora memória do container em tempo real
 	@echo "$(BLUE)📈 Monitorando Recursos (Ctrl+C para sair)...$(NC)"
