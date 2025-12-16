@@ -16,6 +16,7 @@
 - [Arquitetura](#-arquitetura)
 - [Diferenciais Técnicos](#-diferenciais-técnicos)
 - [Quickstart](#-quickstart)
+- [Documentação Completa](#-documentação-completa)
 - [Benchmarks](#-benchmarks)
 - [Troubleshooting](#-troubleshooting)
 - [Roadmap](#-roadmap)
@@ -185,6 +186,16 @@ make report
 3. ✅ Sobe Neo4j e importa dados com batch transactions
 4. ✅ Executa teste de carga (20 threads x 10 loops)
 5. ✅ Gera gráficos de latência e throughput
+
+---
+## 📚 Documentação Completa
+
+### Guias Técnicos
+
+| Documento | Descrição |
+|-----------|-----------|
+| [`JMETER_SETUP.md`](docs/JMETER_SETUP.md) | Configuração do Test Plan (Thread Groups, CSV Data, HTTP Samplers) |
+| [`PERFORMANCE_ANALYSIS.md`](docs/PERFORMANCE_ANALYSIS.md) | Framework de análise de métricas SRE (P95, P99, Throughput) |
 
 ---
 
@@ -411,4 +422,5 @@ Conecte-se comigo:
 **⭐ Se este projeto foi útil, deixe uma estrela! ⭐**
 
 </div>
+
 
